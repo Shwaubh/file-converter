@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd">
+	<flow name="ping" doc:id="6cd1b2ce-21df-4957-a6de-3a7f4a7a882c" >
+		<http:listener doc:name="Listener" doc:id="1761db33-507b-4457-a42a-a1b2f34acf4d" config-ref="HTTP_Listener_config" path="/ping"/>
+		<set-payload value='#["hello"]' doc:name="Set Payload" doc:id="1f37cafb-ead0-4939-8f7a-3334c731334a" mimeType="application/json"/>
+	</flow>
+	<flow name="convert-file" doc:id="f77fbb64-46f3-4a59-a5ca-4ddb5753729b" >
+		<http:listener doc:name="Listener" doc:id="f8e13ef8-68f7-4703-90cf-2d3816ee6df0" config-ref="HTTP_Listener_config" path="/file"/>
+		<ee:transform doc:name="Image to ByteArray" doc:id="92516451-fa8c-42e4-9fe0-434b5bead5c8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[import * from dw::core::Binaries
+output application/java
+---
+payload.parts.fileToConvert.content as  Binary {class: "byte[]"}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<java:invoke-static doc:id="b76472f2-853f-41ba-b745-93074c693770" class="ApplyingBorder" method="ApplyingBorderMethod(byte[])">
+			<java:args ><![CDATA[#[{
+	image: payload
+}]]]></java:args>
+		</java:invoke-static>
+		<logger level="INFO" doc:name="Logger" doc:id="0f94f722-5ed5-4682-be80-63971a844568" />
+	</flow>
+</mule>
